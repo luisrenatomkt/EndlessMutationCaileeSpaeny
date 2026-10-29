@@ -1,10 +1,10 @@
 name: Build mod JAR
-
+ 
 on:
   push:
   pull_request:
   workflow_dispatch:
-
+ 
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -12,13 +12,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+ 
       - name: Instalar Java 8 (exigido por ForgeGradle 2.1)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '8'
-
+ 
       - name: Cache do Gradle
         uses: actions/cache@v4
         with:
@@ -27,36 +27,44 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-fg21-${{ hashFiles('build.gradle', 'gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: gradle-fg21-
-
+ 
       - name: Preparar workspace (decompila/deobfusca o Minecraft 1.8.9)
+        shell: bash
         run: |
           chmod +x gradlew
           ./gradlew setupCIWorkspace --no-daemon --stacktrace 2>&1 | tee setup.log
-
+ 
       - name: Testes matematicos (selfTest)
+        shell: bash
         run: ./gradlew selfTest --no-daemon --stacktrace 2>&1 | tee selftest.log
-
+ 
       - name: Compilar e gerar o JAR
+        shell: bash
         run: ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log
-
+ 
       - name: Validar JAR (existe e nao esta vazio)
+        shell: bash
         run: |
-          set -e
+          set -eo pipefail
+          if [ ! -d build/libs ]; then
+            echo "::error::build/libs nao existe: o build nao gerou JAR. Veja o log do passo 'Compilar e gerar o JAR'."
+            exit 1
+          fi
           ls -la build/libs
-          JAR=$(ls build/libs/EndlessMutation-*.jar | grep -v -- '-sources' | head -n 1)
+          JAR=$(ls build/libs/EndlessMutation-*.jar 2>/dev/null | grep -v -- '-sources' | head -n 1 || true)
           test -n "$JAR" || { echo "::error::Nenhum JAR encontrado"; exit 1; }
           test -s "$JAR" || { echo "::error::JAR vazio"; exit 1; }
           unzip -l "$JAR" | grep -q 'com/endlessmutation/EndlessMutation.class' || { echo "::error::Classe principal ausente"; exit 1; }
           unzip -l "$JAR" | grep -q 'mcmod.info' || { echo "::error::mcmod.info ausente"; exit 1; }
           echo "JAR valido: $JAR"
-
+ 
       - name: Publicar JAR como artefato
         uses: actions/upload-artifact@v4
         with:
           name: EndlessMutation-jar
           path: build/libs/EndlessMutation-*.jar
           if-no-files-found: error
-
+ 
       - name: Preservar logs
         if: always()
         uses: actions/upload-artifact@v4
