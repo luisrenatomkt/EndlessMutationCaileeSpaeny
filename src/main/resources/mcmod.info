@@ -1,0 +1,15 @@
+[
+{
+  "modid": "endlessmutation",
+  "name": "Endless Mutation",
+  "description": "NPC predadora imortal que evolui sem limite de nivel ao devorar animais, com mutacoes corporais dinamicas.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "authorList": ["Endless Mutation contributors"],
+  "credits": "Modelo e texturas originais geradas por codigo. Nenhuma pessoa real e representada.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

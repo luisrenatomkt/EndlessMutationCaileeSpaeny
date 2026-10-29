@@ -1,0 +1,45 @@
+// ForgeGradle 2.1 (Minecraft 1.8.9 / Forge 11.15.1.2318). Requer JDK 8 e Gradle 2.14.x (via wrapper).
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { name = "forge"; url = "https://maven.minecraftforge.net/" }
+        maven { name = "forge-legacy"; url = "http://files.minecraftforge.net/maven" }
+        maven { name = "sonatype"; url = "https://oss.sonatype.org/content/repositories/snapshots/" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = "1.0.0"
+group = "com.endlessmutation"
+archivesBaseName = "EndlessMutation"
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava { sourceCompatibility = targetCompatibility = '1.8' }
+tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_20"
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+// Testes matematicos isolados (sem JUnit e sem Minecraft): gradlew selfTest
+task selfTest(type: JavaExec, dependsOn: ['classes', 'testClasses']) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'com.endlessmutation.EvolutionSelfTest'
+}
