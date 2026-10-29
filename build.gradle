@@ -44,4 +44,3 @@ task selfTest(type: JavaExec, dependsOn: ['classes', 'testClasses']) {
     classpath = sourceSets.test.runtimeClasspath
     main = 'com.endlessmutation.EvolutionSelfTest'
 }
- 
