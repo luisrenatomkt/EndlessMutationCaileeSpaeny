@@ -1,24 +1,24 @@
 package com.endlessmutation.entity;
-
+ 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-
+ 
 import com.endlessmutation.config.ModConfig;
-
+ 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ambient.EntityBat;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityBat;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathPoint;
-
+ 
 /**
  * Regras de presa. Hierarquia real em 1.8.9: Cow, Mooshroom(extends Cow), Sheep, Pig, Chicken, Rabbit,
  * Horse (inclui burro/mula: tipos de EntityHorse), Wolf e Ocelot (EntityTameable) herdam de EntityAnimal.
@@ -27,7 +27,7 @@ import net.minecraft.pathfinding.PathPoint;
  */
 public final class PreyRules {
     private PreyRules() {}
-
+ 
     public static boolean isValidPrey(EntityHuntress npc, EntityLivingBase e) {
         if (e == null || e == npc) return false;
         if (e instanceof EntityPlayer || e instanceof EntityHuntress) return false;
@@ -40,7 +40,7 @@ public final class PreyRules {
         if (ModConfig.skipRiddenMounts && e.riddenByEntity instanceof EntityPlayer) return false;
         return true;
     }
-
+ 
     /** Busca por AABB (nunca global), com pontuacao, e checagem de caminho apenas nos melhores candidatos. */
     public static EntityLivingBase findBest(final EntityHuntress npc) {
         double r = ModConfig.searchRadius * (1.0 + 0.5 * npc.getEvolution().getHunger() / 100.0);
@@ -54,7 +54,7 @@ public final class PreyRules {
             cands.add(e);
         }
         if (cands.isEmpty()) return null;
-
+ 
         UUID pending = npc.consumePendingPrey();
         Collections.sort(cands, new Comparator<EntityLivingBase>() {
             public int compare(EntityLivingBase a, EntityLivingBase b) {
@@ -72,11 +72,11 @@ public final class PreyRules {
         }
         return null;
     }
-
+ 
     private static double score(EntityHuntress npc, EntityLivingBase e) {
         return npc.getDistanceSqToEntity(e) / ModConfig.priorityWeight(e);
     }
-
+ 
     public static boolean reachable(EntityHuntress npc, EntityLivingBase t) {
         PathEntity p = npc.getNavigator().getPathToEntityLiving(t);
         if (p == null) return false;
